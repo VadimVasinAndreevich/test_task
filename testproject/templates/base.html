@@ -9,6 +9,7 @@
 <header>
     <h2 align="center">Название</h2>
     {% if name_user %}
+        <a href="{% url 'profile' %}">.....Профиль.....</a>
         <a href="{% url 'logout_user' %}">.....Выйти.....</a>
     {% else %}
         <div class="object">

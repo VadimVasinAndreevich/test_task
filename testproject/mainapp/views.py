@@ -12,6 +12,18 @@ def main_index(request):
     return render(request, 'mainapp/index.html', {'name_user': name_user, 'message': message})
 
 
+def profile(request):
+    """Профиль"""
+    message = 'Добро пожаловать'
+    name_user = request.session.get('name_user', '')
+    user = None
+    if request.session['customer'] is not None:
+        user = Customer.objects.filter(email=request.session['customer']).first()
+    elif request.session['executor'] is not None:
+        user = Executor.objects.filter(email=request.session['executor']).first()
+    return render(request, 'mainapp/profile.html', {'name_user': name_user, 'user': user, 'message': message})
+
+
 def add_customer(request):
     """Создание учётной записи заказчика"""
     if request.method == 'POST':
@@ -67,6 +79,7 @@ def login_customer(request):
         message = 'Ошибка в данных, неверно введены: адрес электронной почты или пароль'
         if customer is not None:
             request.session['name_user'] = customer.name
+            request.session['customer'] = customer.email
             name_user = request.session['name_user']
             message = 'Вы вошли в систему'
             return render(request, 'mainapp/index.html', {'name_user': name_user, 'message': message})
@@ -84,6 +97,7 @@ def login_executor(request):
         message = 'Ошибка в данных, неверно введены: адрес электронной почты или пароль'
         if executor is not None:
             request.session['name_user'] = executor.name
+            request.session['executor'] = executor.email
             name_user = request.session['name_user']
             message = 'Вы вошли в систему'
             return render(request, 'mainapp/index.html', {'name_user': name_user, 'message': message})
@@ -96,5 +110,9 @@ def login_executor(request):
 def logout_user(request):
     """Выход из учётной записи"""
     del request.session['name_user']
+    if request.session['customer'] is not None:
+        request.session['customer'] = None
+    elif request.session['executor'] is not None:
+        request.session['executor'] = None
     message = 'Вы вышли из учётной записи'
     return render(request, 'mainapp/index.html', {'message': message})
